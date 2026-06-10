@@ -8,6 +8,8 @@ services:
     security_opt:
       - seccomp=unconfined
     tty: true
+    ports:
+      - "127.0.0.1:6443:6443"
     tmpfs:
       - /tmp
       - /run
