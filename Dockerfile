@@ -32,7 +32,9 @@ RUN set -eux; \
       kubeadm="${KUBERNETES_VERSION}-1.1" \
       kubectl="${KUBERNETES_VERSION}-1.1"; \
     apt-mark hold kubelet kubeadm kubectl; \
-    printf '%s\n' 'KUBELET_EXTRA_ARGS=--fail-swap-on=false' > /etc/default/kubelet; \
+    mkdir -p /etc/kubernetes; \
+    printf '%s\n' 'nameserver 1.1.1.1' 'nameserver 8.8.8.8' > /etc/kubernetes/resolv.conf; \
+    printf '%s\n' 'KUBELET_EXTRA_ARGS=--fail-swap-on=false --resolv-conf=/etc/kubernetes/resolv.conf' > /etc/default/kubelet; \
     apt-get clean -y; \
     rm -rf /var/lib/apt/lists/* /var/cache/debconf/* /tmp/* /var/tmp/*
 
@@ -41,6 +43,7 @@ RUN set -eux; \
     containerd config default > /etc/containerd/config.toml; \
     sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml; \
     sed -i "s/snapshotter = 'overlayfs'/snapshotter = 'native'/" /etc/containerd/config.toml; \
+    sed -i 's/use_local_image_pull = false/use_local_image_pull = true/' /etc/containerd/config.toml; \
     sed -i "s#sandbox = 'registry.k8s.io/pause:[^']*'#sandbox = 'registry.k8s.io/pause:${PAUSE_VERSION}'#" /etc/containerd/config.toml; \
     printf '%s\n' \
       'net.bridge.bridge-nf-call-ip6tables = 1' \

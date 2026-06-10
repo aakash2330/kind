@@ -4,7 +4,7 @@ services:
     container_name: k8s-cp0
     hostname: cp0
     privileged: true
-    cgroup: host
+    cgroup: private
     security_opt:
       - seccomp=unconfined
     tty: true
@@ -12,8 +12,6 @@ services:
       - /tmp
       - /run
       - /run/lock
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:rw
     networks:
       lab:
         aliases:
@@ -24,7 +22,7 @@ services:
     container_name: k8s-worker0
     hostname: worker0
     privileged: true
-    cgroup: host
+    cgroup: private
     security_opt:
       - seccomp=unconfined
     tty: true
@@ -32,8 +30,6 @@ services:
       - /tmp
       - /run
       - /run/lock
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:rw
     networks:
       lab:
         aliases:
