@@ -94,6 +94,20 @@ export KUBECONFIG=/etc/kubernetes/admin.conf
 
 Why: tells `kubectl` inside `cp0` how to authenticate to the Kubernetes API server.
 
+Still inside `cp0`, patch kube-proxy so it does not try to change the container host's read-only conntrack limit:
+
+```sh
+kubectl -n kube-system get configmap kube-proxy -o yaml \
+  | sed 's/maxPerCore: null/maxPerCore: 0/' \
+  | sed 's/min: null/min: 0/' \
+  | kubectl apply -f -
+
+kubectl -n kube-system rollout restart daemonset/kube-proxy
+kubectl -n kube-system rollout status daemonset/kube-proxy --timeout=180s
+```
+
+Why: Docker or OrbStack can expose `/proc/sys/net/netfilter/nf_conntrack_max` as read-only inside these node containers. Without this patch, kube-proxy can crash with `permission denied`, and Flannel then cannot reach the Kubernetes Service IP `10.96.0.1`.
+
 ## 5. Install Pod Networking
 
 Run inside `cp0`:
